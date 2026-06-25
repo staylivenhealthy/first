@@ -245,11 +245,11 @@
         }, 3000);
 
         function hideCursor() {
-          document.documentElement.style.cursor = "none";
+          // Cursor remains visible - do nothing
         }
 
         document.addEventListener("click", function () {
-          hideCursor();
+          // hideCursor();  // Disabled to keep cursor visible
           document.removeEventListener("click", hideCursor);
           if (isPopupVisible) {
             closeModal();
