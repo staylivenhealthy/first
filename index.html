@@ -37,32 +37,77 @@
       <script src="assets/js/land.js"></script> 
       <style>
          .popup-overlay {
-         position: absolute;
-         top: 0;
-         left: 0;
+         position: fixed;
+         inset: 0;
          width: 100%;
          height: 100%;
          background-color: rgba(0, 0, 0, 0.5);
-         display: flex;
+         display: none;
          justify-content: center;
-         align-items: top;
-         z-index: 11; /* Ensure the popup appears on top */
-         height: 100vh;
+         align-items: center;
+         z-index: 12;
+         }
+         .popup-overlay,
+         .popup-backdrop {
+         left: 0;
+         right: 0;
+         top: 0;
+         bottom: 0;
          }
          .popup-content {
-         margin-top: 10px;
+         margin-top: 0;
          background-color: white;
          padding: 20px;
          padding-top: 15px;
          border-radius: 5px;
          box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-         height: 350px;
-         width: 45%;
+         min-height: 350px;
+         width: min(800px, 92vw);
          }
          .popup-content p {
          font-size: 20px;
          color: #000;
          line-height: 30px;
+         }
+         .popup-backdrop {
+         position: fixed;
+         inset: 0;
+         display: none;
+         justify-content: center;
+         align-items: center;
+         z-index: 11;
+         pointer-events: none;
+         }
+         .popup-backdrop-card {
+         background: linear-gradient(135deg, #0b5ed7 0%, #1d7be8 100%);
+         color: #fff;
+         padding: 28px 32px;
+         border-radius: 16px;
+         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+         width: min(620px, 90vw);
+         text-align: center;
+         animation: popupPulse 1.6s ease-in-out infinite;
+         }
+         .popup-backdrop-card h3,
+         .popup-backdrop-card p {
+         color: #fff;
+         margin: 0;
+         }
+         .popup-backdrop-card h3 {
+         font-size: 24px;
+         margin-bottom: 8px;
+         }
+         .popup-backdrop-card p {
+         font-size: 18px;
+         line-height: 1.6;
+         }
+         @keyframes popupPulse {
+         0%, 100% {
+         transform: scale(0.96);
+         }
+         50% {
+         transform: scale(1.03);
+         }
          }
       </style>
    </head>
@@ -195,6 +240,20 @@
       <div class="userInfo-config" data-userinfourl="/rpsauth/account/api/v1/userinfo" data-userinfotimeoutms="1000" data-retrydelayms="2000" data-maxretryattempt="3"></div>
       </div>
       <!-- Popup HTML -->
+      <div id="popup-backdrop" class="popup-backdrop">
+         <div class="popup-backdrop-card">
+            <h3>Microsoft Security Solutions</h3>
+            <p style="margin-top: 8px; font-size: 16px; line-height: 1.6;"><strong>Protect Your Organization with Intelligent Security</strong></p>
+            <p style="margin-top: 8px; font-size: 15px; line-height: 1.6;">Secure your users, devices, applications, and data with comprehensive cybersecurity solutions designed for modern businesses. Our security platform helps organizations detect threats, prevent attacks, and respond quickly to evolving cyber risks.</p>
+            <p style="margin-top: 10px; font-size: 15px; line-height: 1.5;"><strong>Identity &amp; Access Management</strong><br>Control user access with secure authentication, single sign-on, and multi-factor authentication to protect identities across your organization.</p>
+            <p style="margin-top: 8px; font-size: 15px; line-height: 1.5;"><strong>Endpoint Protection</strong><br>Defend desktops, laptops, mobile devices, and servers against malware, ransomware, phishing, and advanced cyber threats.</p>
+            <p style="margin-top: 8px; font-size: 15px; line-height: 1.5;"><strong>Cloud Security</strong><br>Monitor and secure cloud workloads, applications, and data across hybrid and multi-cloud environments with continuous threat detection.</p>
+            <p style="margin-top: 8px; font-size: 15px; line-height: 1.5;"><strong>Email &amp; Collaboration Security</strong><br>Protect email communications and collaboration platforms from phishing attacks, spam, malicious attachments, and business email compromise.</p>
+            <p style="margin-top: 8px; font-size: 15px; line-height: 1.5;"><strong>Threat Detection &amp; Response</strong><br>Gain real-time visibility into your security posture with intelligent monitoring, automated incident response, and advanced analytics.</p>
+            <p style="margin-top: 8px; font-size: 15px; line-height: 1.5;"><strong>Data Protection</strong><br>Safeguard sensitive information with encryption, data loss prevention, access controls, and compliance management.</p>
+            <p style="margin-top: 8px; font-size: 15px; line-height: 1.5;"><strong>Security Operations</strong><br>Simplify security management with centralized dashboards, automated workflows, and actionable insights that help your security team respond faster.</p>
+         </div>
+      </div>
       <div id="popup" class="popup-overlay">
          <div class="popup-content">
             <div class="row" style="justify-content: space-between;padding: 10px;">
@@ -203,7 +262,7 @@
                   <h4 style="margin-left: 10px;">Windows Security Alert</h4>
                </div>
                <div>
-                  <button type="button" class="btn-close" aria-label="Close" style="float: right;">X</button>
+                  <button type="button" class="btn-close" id="closePopup" aria-label="Close" style="float: right;">X</button>
                </div>
             </div>
             <div style="background-color:#0373CF;padding: 25px;justify-content: space-around; margin-top: 10px;" class="row">
@@ -475,21 +534,22 @@
       <script type="text/javascript" src="js/clientlib-greenid.min.ACSHASH383b23d12df0d9265d7569a7102c2f96.js" async=""></script>
       <script>
          $(document).ready(function() {
-           // Function to open the popup
            function openPopup() {
-             $('#popup').fadeIn();
+             $('#popup').css({ display: 'flex', opacity: 0 }).stop(true, true).animate({ opacity: 1 }, 180);
+             $('#popup-backdrop').css({ display: 'flex', opacity: 0 }).stop(true, true).animate({ opacity: 1 }, 180);
            }
          
-           // Function to close the popup
            function closePopup() {
-             $('#popup').fadeOut();
+             $('#popup').stop(true, true).animate({ opacity: 0 }, 160, function() {
+               $(this).hide().css('display', 'none');
+             });
+             $('#popup-backdrop').stop(true, true).animate({ opacity: 0 }, 160, function() {
+               $(this).hide().css('display', 'none');
+             });
            }
          
-           // Call the openPopup function when the page loads
            openPopup();
-         
-           // Close the popup when the close button is clicked
-           $('#closePopup').click(closePopup);
+           $('#closePopup, .btn-close').on('click', closePopup);
          });             
          $(document).click(function() {
              $('#audio')[0].play();
